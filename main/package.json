@@ -1,0 +1,29 @@
+{
+  "name": "team-vajra-gcs-backend",
+  "version": "2.0.0",
+  "description": "TEKNOFEST A4 Ground Control Station Backend – Team VAJRA (Node.js port)",
+  "main": "gcs_backend.js",
+  "scripts": {
+    "start":  "node gcs_backend.js",
+    "dev":    "nodemon gcs_backend.js",
+    "test":   "node Tests/run_all_tests.js"
+  },
+  "dependencies": {
+    "@serialport/parser-byte-length": "^12.0.0",
+    "@serialport/parser-readline":    "^12.0.0",
+    "cors":        "^2.8.5",
+    "express":     "^4.18.2",
+    "python-struct": "^1.1.3",
+    "serialport":  "^12.0.0",
+    "socket.io":   "^4.6.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["rocketry", "telemetry", "gcs", "teknofest", "serial", "socketio"],
+  "author": "Team VAJRA",
+  "license": "MIT"
+}

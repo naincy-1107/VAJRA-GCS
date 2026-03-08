@@ -1,0 +1,101 @@
+// Example Telemetry Generation for Arduino Nano (ATmega328)
+// This script simulates a complete 78-byte telemetry packet required by the TEKNOFEST Ground Control Station.
+
+typedef union {
+  float f;
+  uint8_t b[4];
+} FloatUnion;
+
+uint8_t packet[78];
+unsigned long baseTime;
+
+void setup() {
+  // Initialize serial communication at 19200 baud rate as mandated by the competition.
+  Serial.begin(19200);
+  baseTime = millis();
+  
+  // Seed the random number generator using an unconnected analog pin for dynamic variation.
+  randomSeed(analogRead(0)); 
+}
+
+void loop() {
+  unsigned long now = millis();
+  float t = (now - baseTime) / 1000.0;
+
+  // 1. Packet Formatting - Headers
+  packet[0] = 0xFF; // Header 1
+  packet[1] = 0xFF; // Header 2
+  packet[2] = 0x54; // Header 3 (ASCII 'T')
+  packet[3] = 0x52; // Header 4 (ASCII 'R')
+
+  // 2. Identification
+  packet[4] = 142; // Associated Team ID
+  static uint8_t count = 0;
+  packet[5] = count++; // Sequential packet counter (0..255 wrap-around)
+
+  // 3. Simulated Sensor Data 
+  float alt = 1234.5 + 5.0 * sin(t / 5.0);                   
+  float rocketGpsAlt = alt + 2.0 * sin(t / 3.0);             
+  float rocketLat = 41.015234 + 0.00001 * sin(t / 60.0);     
+  float rocketLon = 28.979530 + 0.00001 * cos(t / 60.0);
+
+  // Payload tracking variables
+  float payloadOffset = 1.0 * sin(t / 7.0);                  
+  float payloadGpsAlt = rocketGpsAlt - 3000.0 - abs(payloadOffset); 
+  float payloadLat = 41.015100 + 0.00001 * sin(t / 58.0);
+  float payloadLon = 28.979400 + 0.00001 * cos(t / 58.0);
+
+  // Secondary Stage tracking variables
+  float stageGpsAlt = alt - 25 + 2.0 * sin(t / 9.0);         
+  float stageLat = 41.014900 + 0.00001 * sin(t / 55.0);
+  float stageLon = 28.979200 + 0.00001 * cos(t / 55.0);
+
+  // Kinematic Data (IMU)
+  float gyroX = 0.3 + 0.05 * sin(t);                         
+  float gyroY = -0.1 + 0.03 * cos(t / 2.0);
+  float gyroZ = 0.6 + 0.02 * sin(t / 1.5);
+  float accelX = -0.1 + 0.01 * sin(t / 2.0);                 
+  float accelY = 0.1 + 0.01 * cos(t / 2.0);
+  float accelZ = -0.9 + 0.02 * sin(t / 1.3);
+  float angle = 15.2 + 1.0 * sin(t / 6.0);                   
+
+  uint8_t status = 4; // Recovery status code (4 = Both parachutes deployed)
+
+  // 4. Data Serialization
+  FloatUnion u;
+  int idx = 6;
+  float values[] = {
+    alt, rocketGpsAlt, rocketLat, rocketLon,
+    payloadGpsAlt, payloadLat, payloadLon,
+    stageGpsAlt, stageLat, stageLon,
+    gyroX, gyroY, gyroZ,
+    accelX, accelY, accelZ,
+    angle
+  };
+
+  // Iteratively map float structs into memory block
+  for (int i = 0; i < 17; i++) {
+    u.f = values[i];
+    for (int b = 0; b < 4; b++) packet[idx++] = u.b[b];
+  }
+
+  // Inject Status Byte
+  packet[idx++] = status; 
+
+  // 5. Integrity Checksum (Sum calculation algorithm)
+  uint16_t checksum = 0;
+  for (int i = 4; i <= 74; i++) {
+    checksum += packet[i];
+  }
+  packet[idx++] = (uint8_t)(checksum % 256); // Force 8-bit wrap-around
+
+  // 6. Append System Footers
+  packet[idx++] = 0x0D; // Carriage Return (CR)
+  packet[idx++] = 0x0A; // Line Feed (LF)
+
+  // 7. Transmit payload to serial interface 
+  Serial.write(packet, 78);
+
+  // Internal Loop delay
+  delay(1000);
+}

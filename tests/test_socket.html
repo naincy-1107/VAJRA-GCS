@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Test</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .connected { background-color: #2d5a2d; }
+        .disconnected { background-color: #5a2d2d; }
+        .error { background-color: #5a2d2d; }
+        .telemetry {
+            background-color: #2d2d5a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Socket.IO Telemetry Test</h1>
+        
+        <div id="status" class="status disconnected">
+            Status: Disconnected
+        </div>
+        
+        <button onclick="connectSocket()">Connect</button>
+        <button onclick="disconnectSocket()">Disconnect</button>
+        <button onclick="sendTestTelemetry()">Send Test Telemetry</button>
+        <button onclick="clearLog()">Clear Log</button>
+        
+        <div id="log" class="telemetry">
+            Ready to test Socket.IO connection...
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:5000';
+        let socket = null;
+        let logElement = document.getElementById('log');
+        let statusElement = document.getElementById('status');
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function updateStatus(status, className) {
+            statusElement.textContent = `Status: ${status}`;
+            statusElement.className = `status ${className}`;
+        }
+
+        function connectSocket() {
+            if (socket) {
+                socket.disconnect();
+            }
+
+            log('Connecting to Socket.IO...');
+            updateStatus('Connecting...', 'disconnected');
+
+            socket = io(API_BASE, {
+                transports: ['websocket', 'polling'],
+                autoConnect: true,
+                reconnection: true,
+                reconnectionAttempts: 10,
+                reconnectionDelay: 1000,
+                timeout: 20000,
+                forceNew: true
+            });
+
+            socket.on('connect', () => {
+                log('✅ Socket.IO connected successfully!');
+                updateStatus('Connected', 'connected');
+            });
+
+            socket.on('disconnect', (reason) => {
+                log(`❌ Socket.IO disconnected: ${reason}`);
+                updateStatus('Disconnected', 'disconnected');
+            });
+
+            socket.on('telemetry', (data) => {
+                log('📡 Received telemetry data:');
+                log(JSON.stringify(data, null, 2));
+            });
+
+            socket.on('error', (error) => {
+                log(`❌ Socket.IO error: ${error}`);
+                updateStatus('Error', 'error');
+            });
+
+            socket.on('connect_error', (error) => {
+                log(`❌ Socket.IO connection error: ${error}`);
+                updateStatus('Connection Error', 'error');
+            });
+
+            socket.on('reconnect', (attemptNumber) => {
+                log(`🔄 Socket.IO reconnected after ${attemptNumber} attempts`);
+                updateStatus('Connected', 'connected');
+            });
+
+            socket.on('reconnect_error', (error) => {
+                log(`❌ Socket.IO reconnection error: ${error}`);
+                updateStatus('Reconnection Error', 'error');
+            });
+        }
+
+        function disconnectSocket() {
+            if (socket) {
+                socket.disconnect();
+                log('🔌 Socket.IO disconnected manually');
+                updateStatus('Disconnected', 'disconnected');
+            }
+        }
+
+        async function sendTestTelemetry() {
+            try {
+                log('🧪 Sending test telemetry...');
+                const response = await fetch(`${API_BASE}/api/test_telemetry`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                log(`✅ Test telemetry sent: ${JSON.stringify(result)}`);
+            } catch (error) {
+                log(`❌ Error sending test telemetry: ${error.message}`);
+            }
+        }
+
+        function clearLog() {
+            logElement.textContent = 'Log cleared...\n';
+        }
+
+        // Auto-connect on page load
+        window.onload = function() {
+            log('🚀 Page loaded, auto-connecting...');
+            connectSocket();
+        };
+    </script>
+</body>
+</html> 

@@ -1,0 +1,10 @@
+# Flask and related extensions
+flask
+flask_cors
+flask_socketio
+
+# Asynchronous networking library
+eventlet
+
+# Serial communication library
+pyserial
