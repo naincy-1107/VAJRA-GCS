@@ -3,6 +3,8 @@
  * test_tx_format.js
  * Verifies that the JS createTxPacket() output is byte-identical
  * to the reference txCheck.py format.
+ * This test ensures the telemetry packet creation function produces
+ * the correct binary format for transmission.
  * JS port of Tests/test_tx_format.py
  */
 

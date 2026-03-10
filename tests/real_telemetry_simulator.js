@@ -2,6 +2,8 @@
 /**
  * real_telemetry_simulator.js
  * Simulates realistic rocket telemetry and POSTs it to the JS backend.
+ * This simulator generates mock telemetry data mimicking real rocket flight
+ * and sends it to the GCS backend for testing purposes.
  * JS port of Tests/real_telemetry_simulator.py
  */
 

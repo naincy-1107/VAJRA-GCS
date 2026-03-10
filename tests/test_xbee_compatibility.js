@@ -2,6 +2,8 @@
 /**
  * test_xbee_compatibility.js
  * Verifies XBee packet format with all-zero float values.
+ * This test checks the compatibility of the packet format with XBee modules
+ * by creating packets with zeroed telemetry data.
  * JS port of Tests/test_xbee_compatibility.py
  */
 

@@ -2,6 +2,9 @@
  * GCS Backend - JavaScript (Node.js)
  * Team VAJRA - TEKNOFEST A4 International Category 2025
  *
+ * This file implements the Node.js backend for the Ground Control Station (GCS).
+ * It handles telemetry data reception from the rocket via serial port (XBee),
+ * processes the data, and broadcasts it in real-time to connected clients using Socket.IO.
  * Converted from gcs_backend.py
  * Uses Express + Socket.IO + serialport
  */

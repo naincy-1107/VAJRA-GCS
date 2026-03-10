@@ -2,6 +2,8 @@
 /**
  * tx_port_simulator.js
  * Listens on a serial port for 78-byte packets and prints them.
+ * This simulator acts as a receiver for telemetry packets, useful for
+ * testing the transmission without actual rocket hardware.
  * JS port of Tests/tx_port_simulator.py
  *
  * Usage:  node Tests/tx_port_simulator.js <port> [duration_seconds]

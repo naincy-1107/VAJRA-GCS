@@ -2,6 +2,8 @@
 /**
  * run_all_tests.js
  * Runs all unit/integration tests that do NOT require physical hardware.
+ * This script executes a suite of automated tests to verify the functionality
+ * of the GCS system components without needing hardware connections.
  * Hardware-dependent tests (test_tx_port, tx_port_simulator) are skipped.
  */
 

@@ -2,6 +2,8 @@
 /**
  * test_socket_connection.js
  * Tests Socket.IO connection + HTTP endpoints.
+ * This test verifies the WebSocket connections and HTTP API endpoints
+ * of the GCS backend for real-time data communication.
  * JS port of Tests/test_socket_connection.py
  */
 

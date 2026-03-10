@@ -2,6 +2,8 @@
 /**
  * test_tx_port.js
  * Tests TX serial port functionality by sending test packets.
+ * This test sends telemetry packets through the serial port to verify
+ * hardware communication with the rocket's transmission system.
  * JS port of Tests/test_tx_port.py
  */
 
